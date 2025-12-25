@@ -25,7 +25,7 @@ PRICE_GEAR = 100
 # 3. 教練名單
 DEFAULT_COACHES = [
     {"name": "莊祥霖", "role": "主教", "is_admin": True},
-    {"name": "測試教練", "role": "助教", "is_admin": False},
+    {"name": "黃奕硯", "role": "實習主教", "is_admin": False},
 ]
 
 # ===============================
@@ -270,3 +270,4 @@ elif page == "🔵 管理者後台":
                 
                 st.metric("本月總支出", f"${filtered_df['金額'].sum():,}")
                 st.dataframe(filtered_df, use_container_width=True)
+
