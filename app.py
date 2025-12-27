@@ -99,7 +99,7 @@ with st.sidebar:
 # 🟢 教練打卡區 (邏輯完全移植)
 # ==========================================
 if app_mode == "👨‍🏫 教練打卡區":
-    st.title(f"👋 早安，{selected_name}")
+    st.title(f"👋 你好，{selected_name}")
     
     # 1. 數據卡 (改為從雲端讀取)
     today_income = 0
@@ -364,5 +364,6 @@ elif app_mode == "📊 管理者後台":
         st.json(DEFAULT_COACHES)
         st.subheader("目前生效的費率 (唯讀)")
         st.json(DEFAULT_RATES)
+
 
 
