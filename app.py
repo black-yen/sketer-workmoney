@@ -32,8 +32,8 @@ DEFAULT_COACHES = [
     {"name": "周承燁", "role": "實習主教", "is_admin": False},
     {"name": "蔡孟澔", "role": "實習主教", "is_admin": False},
     {"name": "藍奕翔", "role": "實習主教", "is_admin": False},
-    {"name": "蔡宜蓁", "role": "實習助教", "is_admin": False},
-    {"name": "劉恩加", "role": "實習助教", "is_admin": False},
+    {"name": "蔡宜蓁", "role": "助教", "is_admin": False},
+    {"name": "劉恩加", "role": "助教", "is_admin": False},
 ]
 
 # ==========================================
@@ -370,6 +370,7 @@ elif app_mode == "📊 管理者後台":
         st.json(DEFAULT_COACHES)
         st.subheader("目前生效的費率 (唯讀)")
         st.json(DEFAULT_RATES)
+
 
 
 
