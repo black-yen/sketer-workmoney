@@ -6,7 +6,7 @@ import time
 from datetime import datetime, timedelta, timezone
 
 # ==========================================
-# ⚙️ 系統設定 (原本的 JSON 設定改成寫在這裡，才不會消失)
+# ⚙️ 系統設定
 # ==========================================
 
 TW_TZ = timezone(timedelta(hours=8))
@@ -23,7 +23,7 @@ DEFAULT_RATES = {
 # 2. 額外加給
 DEFAULT_EXTRAS = {"鞋子": 500, "護具": 100}
 
-# 3. 教練名單 (要新增人名，請直接複製一行修改)
+# 3. 教練名單
 DEFAULT_COACHES = [
     {"name": "莊祥霖", "role": "主教", "is_admin": True},
     {"name": "莊雁貽", "role": "主教", "is_admin": False},
@@ -37,7 +37,7 @@ DEFAULT_COACHES = [
 ]
 
 # ==========================================
-# 🔧 Google Cloud 連線工具 (核心心臟)
+# 🔧 Google Cloud 連線工具
 # ==========================================
 
 def get_tw_time():
@@ -59,14 +59,13 @@ def init_sheet_header(sheet):
     """確保雲端試算表有標題"""
     try:
         if not sheet.row_values(1):
-            # 依照你原本的欄位順序
             header = ["日期", "年份", "月份", "姓名", "職位", "班級", "人數", "基本薪資", "跟課主教", "助教扣款", "鞋子", "護具", "裝備獎金", "總金額", "建檔時間"]
             sheet.append_row(header)
     except:
         pass
 
 # ==========================================
-# 🖥️ 主程式 (UI 介面完全復刻你的版本)
+# 🖥️ 主程式
 # ==========================================
 
 st.set_page_config(page_title="薪資系統 3.0 (雲端版)", page_icon="🛼", layout="wide")
@@ -75,10 +74,8 @@ st.set_page_config(page_title="薪資系統 3.0 (雲端版)", page_icon="🛼", 
 with st.sidebar:
     st.header("👤 使用者登入")
     
-    # 建立選單 (固定括號顯示)
     coach_names = [c["name"] for c in DEFAULT_COACHES]
     
-    # 記憶上一次選擇的使用者
     idx = 0
     if 'last_selected_user' in st.session_state and st.session_state['last_selected_user'] in coach_names:
         idx = coach_names.index(st.session_state['last_selected_user'])
@@ -86,28 +83,25 @@ with st.sidebar:
     selected_name = st.selectbox("請選擇您的名字", coach_names, index=idx)
     st.session_state['last_selected_user'] = selected_name
     
-    # 抓取資料
     current_user_data = next((c for c in DEFAULT_COACHES if c["name"] == selected_name), None)
     
-    # 顯示固定括號 (遵照你的要求)
     if current_user_data:
         st.success(f"目前身份：**{selected_name} ({current_user_data['role']})**")
         
     st.divider()
     
-    # 權限切換
     app_mode = "👨‍🏫 教練打卡區"
     if current_user_data and current_user_data.get('is_admin', False):
         st.info("識別為管理者")
         app_mode = st.radio("前往", ["👨‍🏫 教練打卡區", "📊 管理者後台"])
 
 # ==========================================
-# 🟢 教練打卡區 (邏輯完全移植)
+# 🟢 教練打卡區
 # ==========================================
 if app_mode == "👨‍🏫 教練打卡區":
     st.title(f"👋 你好，{selected_name}")
     
-    # 1. 數據卡 (改為從雲端讀取)
+    # 1. 數據卡
     today_income = 0
     month_income = 0
     
@@ -122,14 +116,11 @@ if app_mode == "👨‍🏫 教練打卡區":
                 df["日期"] = pd.to_datetime(df["日期"])
                 today_date = get_tw_time().date()
                 
-                # 篩選我的資料
                 my_df = df[df["姓名"] == selected_name].copy()
                 
-                # 計算今日
                 today_rows = my_df[my_df["日期"].dt.date == today_date]
                 today_income = today_rows["總金額"].sum()
                 
-                # 計算本月
                 month_rows = my_df[(my_df["日期"].dt.year == today_date.year) & (my_df["日期"].dt.month == today_date.month)]
                 month_income = month_rows["總金額"].sum()
         except:
@@ -141,13 +132,12 @@ if app_mode == "👨‍🏫 教練打卡區":
     
     st.divider()
 
-    # 2. 打卡輸入區 (完全復刻你的 Columns 版型)
+    # 2. 打卡輸入區
     st.subheader("📝 新增紀錄")
     
     d1, d2 = st.columns(2)
     r_date = d1.date_input("日期", get_tw_time())
     
-    # 職位選擇 (預設選你的，但可改)
     role_options = list(DEFAULT_RATES.keys())
     default_role_index = 0
     if current_user_data and current_user_data["role"] in role_options:
@@ -155,7 +145,6 @@ if app_mode == "👨‍🏫 教練打卡區":
     
     r_role = d2.selectbox("職位", role_options, index=default_role_index)
     
-    # 班級連動
     class_dict = DEFAULT_RATES.get(r_role, {})
     class_keys = list(class_dict.keys())
     class_keys.append("📝 其他 (自填)")
@@ -167,13 +156,11 @@ if app_mode == "👨‍🏫 教練打卡區":
         format_func=lambda x: f"{x} (${class_dict[x]})" if x in class_dict else x
     )
     
-    # 邏輯計算
     final_class_name = r_class_select
     calc_base = 0
     count_val = 0
     target_head_coach = "-" 
     
-    # 處理「其他」
     if r_class_select == "📝 其他 (自填)":
         custom_note = d4.text_input("輸入事項說明", placeholder="例：帶隊比賽...")
         custom_price = d4.number_input("輸入金額", min_value=0)
@@ -181,13 +168,11 @@ if app_mode == "👨‍🏫 教練打卡區":
         calc_base = custom_price
         count_val = 1
         
-        # 讓非主教也能選跟課主教
         if "主教" not in r_role:
              all_coaches = [c["name"] for c in DEFAULT_COACHES]
              target_head_coach = d4.selectbox("👀 跟課主教", ["-"] + all_coaches)
              
     else:
-        # 處理標準班級
         unit_price = class_dict[r_class_select]
         
         if "主教" in r_role:
@@ -202,7 +187,6 @@ if app_mode == "👨‍🏫 教練打卡區":
             
             st.markdown("---")
             all_coaches = [c["name"] for c in DEFAULT_COACHES]
-            # 排除自己
             coach_names_only = [c for c in all_coaches if c != selected_name]
             target_head_coach = d4.selectbox("👀 跟課主教 (協助哪位主教?)", ["-"] + coach_names_only)
     
@@ -213,7 +197,6 @@ if app_mode == "👨‍🏫 教練打卡區":
     
     st.markdown("---")
     
-    # --- 送出按鈕 (寫入雲端) ---
     if st.button("✅ 確認送出紀錄", type="primary", use_container_width=True):
         if sheet:
             init_sheet_header(sheet)
@@ -222,25 +205,21 @@ if app_mode == "👨‍🏫 教練打卡區":
             total = calc_base + bonus
             timestamp = str(get_tw_time().strftime("%Y-%m-%d %H:%M:%S"))
             
-            # 1. 寫入自己的紀錄
-            # 欄位順序: ["日期", "年份", "月份", "姓名", "職位", "班級", "人數", "基本薪資", "跟課主教", "助教扣款", "鞋子", "護具", "裝備獎金", "總金額", "建檔時間"]
             row_data = [
                 str(r_date), r_date.year, r_date.month,
                 selected_name, r_role, final_class_name,
-                count_val, calc_base, target_head_coach, 0, # 助教扣款為0
+                count_val, calc_base, target_head_coach, 0, 
                 shoes, gear, bonus, total, timestamp
             ]
             
             with st.spinner("寫入雲端中..."):
                 sheet.append_row(row_data)
                 
-                # 2. 自動扣款功能 (如果有點跟課主教)
                 if target_head_coach != "-" and target_head_coach is not None:
-                    # 幫主教寫入一筆負數資料
                     deduct_row = [
                         str(r_date), r_date.year, r_date.month,
                         target_head_coach, "系統自動扣款", f"扣除助教費 ({selected_name})",
-                        0, -calc_base, "-", 0, # 基本薪資是負的
+                        0, -calc_base, "-", 0, 
                         0, 0, 0, -calc_base, timestamp + "_deduct"
                     ]
                     sheet.append_row(deduct_row)
@@ -250,30 +229,25 @@ if app_mode == "👨‍🏫 教練打卡區":
             time.sleep(1)
             st.rerun()
 
-    # 3. 歷史紀錄 (雲端版)
+    # 3. 歷史紀錄與刪除
     st.markdown("---")
     with st.expander("📂 查看與管理我的近期紀錄 (近 60 天)", expanded=False):
         if not my_df.empty:
-            # 製作顯示名稱給刪除選單用
             my_df = my_df.sort_values("日期", ascending=False)
             
-            # --- 刪除功能 ---
             st.write("### 🗑️ 刪除紀錄")
             
-            # 重新抓取原始資料來對應行號 (避免刪錯)
+            # 🔥【修正】這裡重新讀取資料，為了做「連動刪除」
             raw_data = sheet.get_all_values()
             delete_options = []
             
-            # 建立刪除選單
             for idx, row in enumerate(raw_data):
                 if idx == 0: continue
-                # 只能刪除自己的
+                # 只能選自己的紀錄來刪除
                 if row[3] == selected_name: 
-                     # 顯示：日期 | 班級 | 金額
                      label = f"Row {idx+1} | {row[0]} | {row[5]} (${row[13]})"
                      delete_options.append((idx + 1, label))
             
-            # 只顯示最近 20 筆供刪除
             delete_options.reverse()
             
             target_del = st.selectbox("選擇要刪除的紀錄：", delete_options, format_func=lambda x: x[1]) if delete_options else None
@@ -281,8 +255,40 @@ if app_mode == "👨‍🏫 教練打卡區":
             if target_del:
                 if st.button("🗑️ 確認刪除", type="primary"):
                     try:
-                        sheet.delete_rows(target_del[0])
-                        st.success("刪除成功！")
+                        # 1. 取得要刪除的主紀錄行號 (1-based)
+                        main_row_idx = target_del[0]
+                        
+                        # 2. 找出這筆紀錄的「建檔時間」
+                        # raw_data 的 index 是從 0 開始，所以要 -1
+                        main_record = raw_data[main_row_idx - 1]
+                        main_timestamp = main_record[14] # 第 15 欄是建檔時間
+                        
+                        # 3. 預測對應的「扣款紀錄」時間戳記
+                        deduct_timestamp = main_timestamp + "_deduct"
+                        deduct_row_idx = -1
+                        
+                        # 4. 搜尋有沒有這一筆扣款紀錄
+                        for i, row in enumerate(raw_data):
+                            if len(row) > 14 and row[14] == deduct_timestamp:
+                                deduct_row_idx = i + 1 # 轉回 1-based 行號
+                                break
+                        
+                        # 5. 開始刪除
+                        if deduct_row_idx != -1:
+                            # 如果有找到扣款紀錄，兩個都要刪
+                            # 🔥 重要：要先刪行號比較大的，才不會影響小的行號
+                            if deduct_row_idx > main_row_idx:
+                                sheet.delete_rows(deduct_row_idx)
+                                sheet.delete_rows(main_row_idx)
+                            else:
+                                sheet.delete_rows(main_row_idx)
+                                sheet.delete_rows(deduct_row_idx)
+                            st.success(f"刪除成功！(包含連動的 ${main_record[13]} 扣款紀錄)")
+                        else:
+                            # 沒找到扣款紀錄 (可能是一般課程)，只刪除主紀錄
+                            sheet.delete_rows(main_row_idx)
+                            st.success("刪除成功！")
+
                         time.sleep(1)
                         st.rerun()
                     except Exception as e:
@@ -290,14 +296,14 @@ if app_mode == "👨‍🏫 教練打卡區":
 
             st.divider()
             st.write("### 📋 詳細列表")
-            display_cols = ["日期", "班級", "總金額", "職位", "備註"] # 簡化顯示
+            display_cols = ["日期", "班級", "總金額", "職位", "備註"] 
             st.dataframe(my_df, use_container_width=True)
             
         else:
             st.info("尚無資料")
 
 # ==========================================
-# 📊 管理者後台 (UI 復刻)
+# 📊 管理者後台
 # ==========================================
 elif app_mode == "📊 管理者後台":
     st.title("📊 管理者中心")
@@ -336,7 +342,6 @@ elif app_mode == "📊 管理者後台":
                 else:
                     st.subheader(f"{sy}年 {sm}月 - 薪資表")
                     
-                    # 統計表
                     summary = m_df.groupby("姓名").agg({
                         "總金額": "sum", "班級": "count", "人數": "sum", "鞋子": "sum", "護具": "sum"
                     }).reset_index().rename(columns={
@@ -350,7 +355,6 @@ elif app_mode == "📊 管理者後台":
                     st.dataframe(summary, use_container_width=True)
                     st.markdown("---")
                     
-                    # 詳細流水帳
                     st.subheader("📋 詳細流水帳")
                     st.dataframe(m_df, use_container_width=True)
 
@@ -365,14 +369,7 @@ elif app_mode == "📊 管理者後台":
         修改完儲存 (Commit)，網頁就會永久更新了！
         """)
         
-        # 顯示目前的設定給你看，方便你複製
         st.subheader("目前生效的名單 (唯讀)")
         st.json(DEFAULT_COACHES)
         st.subheader("目前生效的費率 (唯讀)")
         st.json(DEFAULT_RATES)
-
-
-
-
-
-
