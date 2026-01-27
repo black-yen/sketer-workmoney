@@ -26,7 +26,13 @@ DEFAULT_EXTRAS = {"鞋子": 500, "護具": 100}
 # 3. 教練名單 (要新增人名，請直接複製一行修改)
 DEFAULT_COACHES = [
     {"name": "莊祥霖", "role": "主教", "is_admin": True},
-    {"name": "黃奕硯", "role": "實習主教", "is_admin": True},
+    {"name": "莊雁貽", "role": "主教", "is_admin": False},
+    {"name": "黃奕硯", "role": "實習主教", "is_admin": False},
+    {"name": "劉恩新", "role": "實習主教", "is_admin": False},
+    {"name": "周承燁", "role": "實習主教", "is_admin": False},
+    {"name": "蔡孟澔", "role": "實習主教", "is_admin": False},
+    {"name": "藍奕翔", "role": "實習主教", "is_admin": False},
+    {"name": "蔡宜蓁", "role": "實習主教", "is_admin": False},
     {"name": "劉恩加", "role": "實習助教", "is_admin": False},
 ]
 
@@ -364,6 +370,7 @@ elif app_mode == "📊 管理者後台":
         st.json(DEFAULT_COACHES)
         st.subheader("目前生效的費率 (唯讀)")
         st.json(DEFAULT_RATES)
+
 
 
 
