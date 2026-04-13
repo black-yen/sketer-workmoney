@@ -32,8 +32,9 @@ DEFAULT_COACHES = [
     {"name": "周承燁", "role": "實習主教", "is_admin": False},
     {"name": "蔡孟澔", "role": "實習主教", "is_admin": False},
     {"name": "藍奕翔", "role": "實習主教", "is_admin": False},
-    {"name": "蔡宜蓁", "role": "實習助教", "is_admin": False},
-    {"name": "劉恩加", "role": "實習助教", "is_admin": False},
+    {"name": "蔡宜蓁", "role": "助教", "is_admin": False},
+    {"name": "劉恩加", "role": "助教", "is_admin": False},
+    {"name": "黃秀慧", "role": "實習助教", "is_admin": False},
 ]
 
 # ==========================================
